@@ -16,7 +16,7 @@ public class main : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-		Debug.Log("main start");
+		print("main start");
 		//ConsumerBuilder<Ignore, string> c = new ConsumerBuilder<Ignore, string>(conf).Build()
 		conf = new ConsumerConfig{
 			GroupId = "test-consumer-group",
@@ -29,38 +29,86 @@ public class main : MonoBehaviour
 		c.Subscribe("testTopicName");
 
 		cts = new CancellationTokenSource();
-		Debug.Log("main started");
+		print("main started");
 	}
 
 	public void toggleLogging()
 	{
+		print("in toggleLogging");
 		logging = !logging;
+	}
+
+	public void consumeOnce()
+	{
+		print("in consumeOnce");
+		if (logging)
+		{
+			print("logging");
+			try
+			{
+				print("try");
+				var cr = c.Consume(cts.Token);
+				print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+			}
+			catch (ConsumeException e)
+			{
+				print("catch 1");
+				print($"Error occured: {e.Error.Reason}");
+			}
+			catch (OperationCanceledException)
+			{
+				print("catch 2");
+				print("cancelled");
+				// Ensure the consumer leaves the group cleanly and final offsets are committed.
+				c.Close();
+			}
+
+
+			print("finally");
+		}
+		else
+		{
+			print("not logging");
+		}
 	}
 
 	// Update is called once per frame
 	void Update()
-    {
+	{
+		print("in update, logging:" + logging);
 		if (logging)
 		{
+			print("logging");
 			try
 			{
+				print("try");
 				var cr = c.Consume(cts.Token);
-				Console.WriteLine($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+				print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
 			}
 			catch (ConsumeException e)
 			{
-				Console.WriteLine($"Error occured: {e.Error.Reason}");
+				print("catch 1");
+				print($"Error occured: {e.Error.Reason}");
 			}
 			catch (OperationCanceledException)
 			{
-				Console.WriteLine("cancelled");
+				print("catch 2");
+				print("cancelled");
 				// Ensure the consumer leaves the group cleanly and final offsets are committed.
 				c.Close();
 			}
+
+
+			print("finally");
 		}
 		else
 		{
-			Debug.Log("not logging");
+			print("not logging");
 		}
-    }
+	}
+
+	void print(string msg)
+	{
+		Debug.Log(msg);
+	}
 }
