@@ -12,6 +12,8 @@ public class main : MonoBehaviour
 	ConsumerConfig conf;
 	CancellationTokenSource cts;
 	bool logging = false;
+	int milliseconds = 10;
+	TimeSpan timeout;
 
 	// Start is called before the first frame update
 	void Start()
@@ -23,6 +25,8 @@ public class main : MonoBehaviour
 			BootstrapServers = "localhost:9092",
 			AutoOffsetReset = AutoOffsetReset.Earliest
 		};
+
+		timeout = new TimeSpan(0, 0, 0, 0, milliseconds);
 
 		c = new ConsumerBuilder<Ignore, string>(conf).Build();
 
@@ -82,8 +86,10 @@ public class main : MonoBehaviour
 			try
 			{
 				print("try");
-				var cr = c.Consume(cts.Token);
-				print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+				//var cr = c.Consume(cts.Token);
+				var cr = c.Consume(timeout);
+				//c.Poll(100); // removed post v1 Beta https://stackoverflow.com/questions/50036052/difference-between-poll-and-consume-in-kafka-confluent-library
+				if (cr != null && cr.Value.Count() > 0) { print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'."); }
 			}
 			catch (ConsumeException e)
 			{
