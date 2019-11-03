@@ -48,35 +48,33 @@ public class main : MonoBehaviour
 	public void consumeOnce()
 	{
 		print("in consumeOnce");
-		if (logging)
+		try
 		{
-			print("logging");
-			try
+			print("try");
+			//var cr = c.Consume(cts.Token);
+			var cr = c.Consume(timeout);
+			//c.Poll(100); // removed post v1 Beta https://stackoverflow.com/questions/50036052/difference-between-poll-and-consume-in-kafka-confluent-library
+			if (cr != null && cr.Value.Count() > 0)
 			{
-				print("try");
-				var cr = c.Consume(cts.Token);
 				print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+				text.text += "\n" + cr.Value;
 			}
-			catch (ConsumeException e)
-			{
-				print("catch 1");
-				print($"Error occured: {e.Error.Reason}");
-			}
-			catch (OperationCanceledException)
-			{
-				print("catch 2");
-				print("cancelled");
-				// Ensure the consumer leaves the group cleanly and final offsets are committed.
-				c.Close();
-			}
-
-
-			print("finally");
 		}
-		else
+		catch (ConsumeException e)
 		{
-			print("not logging");
+			print("catch 1 ConsumeException");
+			print($"Error occured: {e.Error.Reason}");
 		}
+		catch (OperationCanceledException)
+		{
+			print("catch 2 OperationCanceledException");
+			print("cancelled");
+			// Ensure the consumer leaves the group cleanly and final offsets are committed.
+			c.Close();
+		}
+		
+		print("finally");
+		
 	}
 
 	// Update is called once per frame
@@ -86,32 +84,7 @@ public class main : MonoBehaviour
 		if (logging)
 		{
 			print("logging");
-			try
-			{
-				print("try");
-				//var cr = c.Consume(cts.Token);
-				var cr = c.Consume(timeout);
-				//c.Poll(100); // removed post v1 Beta https://stackoverflow.com/questions/50036052/difference-between-poll-and-consume-in-kafka-confluent-library
-				if (cr != null && cr.Value.Count() > 0) {
-					print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
-					text.text += "\n" + cr.Value;
-				}
-			}
-			catch (ConsumeException e)
-			{
-				print("catch 1");
-				print($"Error occured: {e.Error.Reason}");
-			}
-			catch (OperationCanceledException)
-			{
-				print("catch 2");
-				print("cancelled");
-				// Ensure the consumer leaves the group cleanly and final offsets are committed.
-				c.Close();
-			}
-
-
-			print("finally");
+			consumeOnce();
 		}
 		else
 		{
