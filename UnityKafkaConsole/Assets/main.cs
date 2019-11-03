@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.UI;
 using Confluent.Kafka;
 
 public class main : MonoBehaviour
 {
+	public Text text;
 	IConsumer<Ignore, string> c;
 	ConsumerConfig conf;
 	CancellationTokenSource cts;
@@ -32,7 +34,8 @@ public class main : MonoBehaviour
 
 		c.Subscribe("testTopicName");
 
-		cts = new CancellationTokenSource();
+		//cts = new CancellationTokenSource();
+		text.text = "";
 		print("main started");
 	}
 
@@ -89,7 +92,10 @@ public class main : MonoBehaviour
 				//var cr = c.Consume(cts.Token);
 				var cr = c.Consume(timeout);
 				//c.Poll(100); // removed post v1 Beta https://stackoverflow.com/questions/50036052/difference-between-poll-and-consume-in-kafka-confluent-library
-				if (cr != null && cr.Value.Count() > 0) { print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'."); }
+				if (cr != null && cr.Value.Count() > 0) {
+					print($"Consumed message '{cr.Value}' at: '{cr.TopicPartitionOffset}'.");
+					text.text += "\n" + cr.Value;
+				}
 			}
 			catch (ConsumeException e)
 			{
