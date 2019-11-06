@@ -1,0 +1,13 @@
+Reset main camera to 0 0 0
+Change camera background to solid color 0 0 0 (black)
+Set near clip plane to 0.85
+
+Edit > Project Settings > Quality
+Windows Store > Very Low
+
+Edit > Project Settings > Player
+Inspector Panel > Windows Store > XR Settings
+Check Virtual Reality Supported
+Ensure Windows Mixed Reality appears in the list
+Inspector Panel > Windows Store > Other Settings
+set Scripting Backed to .net
